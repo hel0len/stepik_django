@@ -6,11 +6,11 @@ def main_view(request):
     return render(request, 'index.html')
 
 
-def departure_view(request, departure):
+def departure_view(request, departure_id):
     return render(request, 'departure.html')
 
 
-def tour_view(request, id):
+def tour_view(request, tour_id):
     return render(request, 'tour.html')
 
 
