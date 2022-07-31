@@ -1,17 +1,52 @@
+import random
+
+from django.http import HttpResponseBadRequest, HttpResponseForbidden, HttpResponseNotFound, HttpResponseServerError
 from django.shortcuts import render
-from django.http import HttpResponseBadRequest, HttpResponseNotFound, HttpResponseForbidden, HttpResponseServerError
+
+from tours.data import departures, description, subtitle, title, tours
 
 
 def main_view(request):
-    return render(request, 'index.html')
+    random_tours = dict(random.sample(tours.items(), k=6))
+    return render(request, 'index.html', context={'departures': departures,
+                                                  'tours': random_tours,
+                                                  'title': title,
+                                                  'subtitle': subtitle,
+                                                  'description': description})
 
 
 def departure_view(request, departure_id):
-    return render(request, 'departure.html')
+    tour_prices = []
+    tour_nights = []
+    tours_in_departure = {}
+    for key, value in tours.items():
+        if departure_id == value["departure"]:
+            tours_in_departure[key] = value
+            tour_prices.append(value['price'])
+            tour_nights.append(value['nights'])
+    min_price = min(tour_prices)
+    max_price = max(tour_prices)
+    min_night = min(tour_nights)
+    max_night = max(tour_nights)
+    return render(request, 'departure.html', context={'departures': departures,
+                                                      'departure': departures[departure_id],
+                                                      'tours': tours_in_departure,
+                                                      'min_price': min_price,
+                                                      'max_price': max_price,
+                                                      'min_nights': min_night,
+                                                      'max_nights': max_night,
+                                                      'title': title})
 
 
 def tour_view(request, tour_id):
-    return render(request, 'tour.html')
+    tour = tours[tour_id]
+    departure = departures[tour['departure']]
+    hotel_rating = '⭐' * int(tour['stars'])
+    return render(request, 'tour.html', context={'departures': departures,
+                                                 'departure': departure,
+                                                 'tour': tours[tour_id],
+                                                 'stars': hotel_rating,
+                                                 'title': title})
 
 
 def custom_handler400(request, exception):
